@@ -1,0 +1,46 @@
+.wrap{
+    cursor: none; //カーソルを非表示
+  }
+  .item{
+    pointer-events: none; //ポインターに反応しないようにする
+    position: fixed; top: 0; left: 0; opacity: 0;
+    &-01{
+      z-index: 103; transition: opacity .2s; //遅れることなく追従する（透明度の変化にだけ時間をかける）
+    }
+    &-02{
+      z-index: 102; transition: all .2s; //.2s かけて追従する
+    }
+    &-03{
+      z-index: 101; transition: all .4s; //.4s かけて追従する
+    }
+    &.active{
+      opacity: 1;
+    }
+  }
+  .interior{
+    transform: translate(-50%, -50%); //中央に寄せる
+    transition: all .2s; //点線の枠に入った時、.2sかけて変化させる
+    //装飾 初め
+    border-radius: 50%;
+    &-01{
+      width: 2em; height: 2em; background: #845080;
+      &::before{
+        content: "";
+      }
+    }
+    &-02{
+      width: 3em; height: 3em; background: #e7d4e3;
+    }
+    &-03{
+      width: 4em; height: 4em; border: 1px solid #a675a5;
+    }
+  }
+  .isin01 .interior{
+    //装飾 点線の枠に入っている時1
+  }
+  .isin02 .interior{
+    //装飾 点線の枠に入っている時2
+  }
+  .isin03 .interior{
+    //装飾 点線の枠に入っている時3
+  }
