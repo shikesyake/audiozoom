@@ -19,36 +19,51 @@ onmousemove = function(e) {
 // }
 
 const audio = new AudioContext(); // 音声ファイルを指定
-const audioElement = document.querySelector('audio');
+const audioElement = document.querySelector('#audio');
 const track = audio.createMediaElementSource(audioElement);
+
+const audioElement2 = document.querySelector('#audio2');
+const track2 = audio.createMediaElementSource(audioElement2);
 
 audio.loop = true; // ループ再生を有効化
 
+const gainNode = audio.createGain();
+const gainNode2 = audio.createGain();
+
 document.getElementById('play_btn')
   .addEventListener('click', function() {
-    track.connect(gainNode);
-    audioElement.play();
+    audio.resume().then(() => {
+      audioElement.play();
+      audioElement2.play();
+    });
   }, false);
 
   
-const gainNode = audio.createGain();
 
 let curX;
 const WIDTH = window.innerWidth;
 
-// マウスが動いたら新しいY座標を取得し、
+// マウスが動いたら新しいX座標を取得し、
 // ゲインの値を設定する
 document.onmousemove = updatePage;
 
 function updatePage(e) {
   curX = e.pageX;
-  gainNode.gain.value = curX / WIDTH;
+  // gainNode.gain.value = curX / WIDTH;
+  // track.connect(gainNode).connect(audio.destination);
+
+  // audioのゲイン（X座標が右に行くほど音量が上がる）
+  const gainValue1 = curX / WIDTH;
+  gainNode.gain.value = gainValue1;
+  
+  // audio2のゲイン（X座標が左に行くほど音量が上がる）
+  const gainValue2 = 1 - (curX / WIDTH);
+  gainNode2.gain.value = gainValue2;
+  
   track.connect(gainNode).connect(audio.destination);
+  track2.connect(gainNode2).connect(audio.destination);
 }
 
-const audio2 = new AudioContext(); // 音声ファイルを指定
-const audioElement2 = document.querySelector('audio2');
-const track2 = audio.createMediaElementSource(audioElement2);
 
 // // ウィンドウ全体でマウスの動きを監視
 // window.addEventListener('mousemove', (event) => {
