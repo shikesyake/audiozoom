@@ -54,10 +54,13 @@ function updatePage(e) {
 
   // audioのゲイン（X座標が右に行くほど音量が上がる）
   const gainValue1 = curX / WIDTH;
+  // const gainValue1 = 0.3;
+  console.log(gainNode.gain.value,gainNode.gain.maxValue,gainNode.gain.minValue)
   gainNode.gain.value = gainValue1;
   
   // audio2のゲイン（X座標が左に行くほど音量が上がる）
   const gainValue2 = 1 - (curX / WIDTH);
+  // const gainValue2 = 0;
   gainNode2.gain.value = gainValue2;
   
   track.connect(gainNode).connect(audio.destination);
