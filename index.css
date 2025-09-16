@@ -19,3 +19,18 @@ body{
     font-size:30px;
 }
 
+.video-wrapper {
+  width: 1000px;         /* 動画と同じ幅 */
+  height: auto;          /* 必要に応じて高さも指定 */
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.video {
+  transition: transform 0.2s;
+  display: block;
+  /* transform-origin: center center; */
+}
+

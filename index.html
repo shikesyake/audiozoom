@@ -3,16 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>AudioZoom</title>
     <link rel="stylesheet" href="index.css"/>
 </head>
 <body>
     <p id="output"></p>
     <hr>
     <button id="play_btn">play</button>
-    <div class="sound">
+    <div class="media">
     <div><figcaption>左:</figcaption>
         <audio id="audio" controls src="./media/StereoAudioLoop_left.mp3" preload="metadata"></audio></div>
+    <div><figcaption>動画:</figcaption>
+        <div class="video-wrapper">
+            <video class="video" src="./media/90s-video_spin.mp4" controls width="1000px"></video>
+        </div>
+    </div>
     <div><figcaption>右:</figcaption>
         <audio id="audio2" controls src="./media/StereoAudioLoop_right.mp3" preload="metadata"></audio></div>
     </div>

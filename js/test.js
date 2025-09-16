@@ -84,7 +84,35 @@ function updatePage(e) {
 
 //   console.log(`Volume: ${volume}`); // デバッグ用に音量を表示
 // });
+// --- 動画ズーム機能 ---
+const video = document.querySelector('.video');
+const videoWrapper = document.querySelector('.video-wrapper');
+let scale = 1;
 
+video.addEventListener('wheel', function(e) {
+  e.preventDefault();
+
+  // videoWrapper内でのマウス座標を取得
+  const rect = video.getBoundingClientRect();
+  const wrapperRect = videoWrapper.getBoundingClientRect();
+  const offsetX = e.clientX - rect.left;
+  const offsetY = e.clientY - rect.top;
+  const percentX = (offsetX / rect.width) * 100;
+  const percentY = (offsetY / rect.height) * 100;
+
+  // transform-originをマウス位置に
+  video.style.transformOrigin = `${percentX}% ${percentY}%`;
+
+  // ホイール上で拡大、下で縮小
+  if (e.deltaY < 0) {
+    scale += 0.1;
+  } else {
+    scale -= 0.1;
+  }
+  // 最小・最大倍率を制限（最小1に変更）
+  scale = Math.max(1, Math.min(scale, 3));
+  video.style.transform = `scale(${scale})`;
+});
 
 
 
