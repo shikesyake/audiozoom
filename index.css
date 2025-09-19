@@ -20,8 +20,8 @@ body{
 }
 
 .video-wrapper {
-  width: 1000px;         /* 動画と同じ幅 */
-  height: auto;          /* 必要に応じて高さも指定 */
+  width: 1280px;         /* 動画と同じ幅 */
+  height: 720px;          /* 必要に応じて高さも指定 */
   overflow: hidden;
   display: flex;
   justify-content: center;
@@ -29,8 +29,11 @@ body{
 }
 
 .video {
+  width: 1280px;         /* 動画と同じ幅 */
+  height: 720px;          /* 必要に応じて高さも指定 */
   transition: transform 0.2s;
   display: block;
   /* transform-origin: center center; */
+  user-select: none;
 }
 

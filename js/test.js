@@ -55,7 +55,7 @@ function updatePage(e) {
   // audioのゲイン（X座標が右に行くほど音量が上がる）
   const gainValue1 = curX / WIDTH;
   // const gainValue1 = 0.3;
-  console.log(gainNode.gain.value,gainNode.gain.maxValue,gainNode.gain.minValue)
+  //console.log(gainNode.gain.value,gainNode.gain.maxValue,gainNode.gain.minValue)
   gainNode.gain.value = gainValue1;
   
   // audio2のゲイン（X座標が左に行くほど音量が上がる）
@@ -110,8 +110,44 @@ video.addEventListener('wheel', function(e) {
     scale -= 0.1;
   }
   // 最小・最大倍率を制限（最小1に変更）
-  scale = Math.max(1, Math.min(scale, 3));
+  scale = Math.max(1, Math.min(scale, 5));
   video.style.transform = `scale(${scale})`;
+});
+
+let isDragging = false;
+let dragStart = { x: 0, y: 0 };
+let origin = { x: 50, y: 50 }; // デフォルトは中央
+
+videoWrapper.addEventListener('mousedown', function(e) {
+  isDragging = true;
+  dragStart.x = e.clientX;
+  dragStart.y = e.clientY;
+  // ドラッグ開始時のoriginを記録
+  origin.x = parseFloat(video.style.transformOrigin.split('%')[0]) || 50;
+  origin.y = parseFloat(video.style.transformOrigin.split('%')[1]) || 50;
+});
+
+document.addEventListener('mouseup', function(e) {
+  isDragging = false;
+});
+
+videoWrapper.addEventListener('mousemove', function(e) {
+  if(scale === 1) return; // 拡大していないときは移動しない
+  if (!isDragging) return;
+  const offsetX = e.clientX;
+  const offsetY = e.clientY;
+  // ドラッグ量を計算
+  console.log(videoWrapper.clientWidth);
+  const dx = ((offsetX - dragStart.x) / videoWrapper.clientWidth) * 100 / (scale-1);
+  const dy = ((offsetY - dragStart.y) / videoWrapper.clientHeight) * 100 / (scale-1);
+  // originを移動
+  let newX = origin.x - dx;
+  let newY = origin.y - dy;
+  // 0～100%に制限
+  newX = Math.max(0, Math.min(newX, 100));
+  newY = Math.max(0, Math.min(newY, 100));
+  video.style.transformOrigin = `${newX}% ${newY}%`;
+  console.log(newX,newY);
 });
 
 
