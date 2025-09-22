@@ -8,7 +8,7 @@ document.onmousemove = onmousemove;
 onmousemove = function(e) {
   output.innerHTML = `x:` + e.pageX + ` y:` + e.pageY;
   if (e.pageX < 200);
-  
+
 
 }
 
@@ -47,6 +47,7 @@ const WIDTH = window.innerWidth;
 // ゲインの値を設定する
 document.onmousemove = updatePage;
 
+// マウスベースで音量を変える
 function updatePage(e) {
   curX = e.pageX;
   // gainNode.gain.value = curX / WIDTH;
@@ -66,6 +67,30 @@ function updatePage(e) {
   track.connect(gainNode).connect(audio.destination);
   track2.connect(gainNode2).connect(audio.destination);
 }
+// おそらく不要 origin基準で音量を変える
+// function updatePage(e) {
+//   curX = e.pageX;
+
+//   // originの位置を取得
+//   let originX = 0.5; // デフォルト: 中央
+//   if (video && video.style.transformOrigin) {
+//     const [ox, ] = video.style.transformOrigin.split('%');
+//     originX = parseFloat(ox) / 100;
+//   }
+
+//   // originの位置を基準にゲインを計算
+//   // originX=0なら左端、1なら右端
+//   // originXを中心として左右で音量が変化するように
+//   const relX = (curX / WIDTH - originX) + 0.5; // originX基準で0～1に正規化
+//   const gainValue1 = Math.max(0, Math.min(relX, 1));
+//   const gainValue2 = 1 - gainValue1;
+
+//   gainNode.gain.value = gainValue1;
+//   gainNode2.gain.value = gainValue2;
+
+//   track.connect(gainNode).connect(audio.destination);
+//   track2.connect(gainNode2).connect(audio.destination);
+// }
 
 
 // // ウィンドウ全体でマウスの動きを監視
@@ -148,6 +173,9 @@ videoWrapper.addEventListener('mousemove', function(e) {
   newY = Math.max(0, Math.min(newY, 100));
   video.style.transformOrigin = `${newX}% ${newY}%`;
   console.log(newX,newY);
+  output.innerHTML = `x:` + newX.toFixed(1) + ` y:` + newY.toFixed(1);
+  //scale*1/2
+  //scale-1
 });
 
 
