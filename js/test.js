@@ -6,11 +6,19 @@ const output = document.querySelector('#output');
 //マウス移動時
 document.onmousemove = onmousemove;
 onmousemove = function(e) {
-  output.innerHTML = `x:` + e.pageX + ` y:` + e.pageY;
+  output1.innerHTML = `x:` + e.pageX + ` y:` + e.pageY;
   if (e.pageX < 200);
 
 
 }
+
+const audiodata = [
+  {x:50, y:600, tag:'audioElement'},
+  {x:1230, y:600, tag:'audioElement2'},
+  // {x:600, y:50, file:'audio/sample3.mp3'},
+  // {x:900, y:50, file:'audio/sample4.mp3'},
+  // {x:1200, y:50, file:'audio/sample5.mp3'},
+];
 
 // //マウス離脱時
 // document.onmouseout = onmouseout;
@@ -47,68 +55,54 @@ const WIDTH = window.innerWidth;
 // ゲインの値を設定する
 document.onmousemove = updatePage;
 
-// マウスベースで音量を変える
-function updatePage(e) {
-  curX = e.pageX;
-  // gainNode.gain.value = curX / WIDTH;
-  // track.connect(gainNode).connect(audio.destination);
-
-  // audioのゲイン（X座標が右に行くほど音量が上がる）
-  const gainValue1 = curX / WIDTH;
-  // const gainValue1 = 0.3;
-  //console.log(gainNode.gain.value,gainNode.gain.maxValue,gainNode.gain.minValue)
-  gainNode.gain.value = gainValue1;
-  
-  // audio2のゲイン（X座標が左に行くほど音量が上がる）
-  const gainValue2 = 1 - (curX / WIDTH);
-  // const gainValue2 = 0;
-  gainNode2.gain.value = gainValue2;
-  
-  track.connect(gainNode).connect(audio.destination);
-  track2.connect(gainNode2).connect(audio.destination);
-}
-// おそらく不要 origin基準で音量を変える
+// // マウスベースで音量を変える
 // function updatePage(e) {
 //   curX = e.pageX;
+//   // gainNode.gain.value = curX / WIDTH;
+//   // track.connect(gainNode).connect(audio.destination);
 
-//   // originの位置を取得
-//   let originX = 0.5; // デフォルト: 中央
-//   if (video && video.style.transformOrigin) {
-//     const [ox, ] = video.style.transformOrigin.split('%');
-//     originX = parseFloat(ox) / 100;
-//   }
-
-//   // originの位置を基準にゲインを計算
-//   // originX=0なら左端、1なら右端
-//   // originXを中心として左右で音量が変化するように
-//   const relX = (curX / WIDTH - originX) + 0.5; // originX基準で0～1に正規化
-//   const gainValue1 = Math.max(0, Math.min(relX, 1));
-//   const gainValue2 = 1 - gainValue1;
-
+//   // audioのゲイン（X座標が右に行くほど音量が上がる）
+//   const gainValue1 = curX / WIDTH;
+//   // const gainValue1 = 0.3;
+//   //console.log(gainNode.gain.value,gainNode.gain.maxValue,gainNode.gain.minValue)
 //   gainNode.gain.value = gainValue1;
+  
+//   // audio2のゲイン（X座標が左に行くほど音量が上がる）
+//   const gainValue2 = 1 - (curX / WIDTH);
+//   // const gainValue2 = 0;
 //   gainNode2.gain.value = gainValue2;
-
+  
+//   console.log(gainValue1,gainValue2);
 //   track.connect(gainNode).connect(audio.destination);
 //   track2.connect(gainNode2).connect(audio.destination);
 // }
+// origin基準で音量を変える
+function updatePage(e) {
+  // マウスの位置は無視し、originXのみでゲインを決定
+  let originX = window.innerWidth / 2; // デフォルト: 中央
+  if (video && video.style.transformOrigin) {
+    const [ox, ] = video.style.transformOrigin.split(' ');
+    if (ox.endsWith('px')) {
+      originX = parseFloat(ox);
+    } else if (ox.endsWith('%')) {
+      // %指定の場合はpxに変換
+      originX = (parseFloat(ox) / 100) * window.innerWidth;
+    }
+  }
+
+  // originXを0～window.innerWidthで正規化
+  const relX = originX / window.innerWidth; // 0～1
+  const gainValue1 = Math.max(0, Math.min(relX, 1));
+  const gainValue2 = 1 - gainValue1;
+
+  gainNode.gain.value = gainValue1;
+  gainNode2.gain.value = gainValue2;
+
+  track.connect(gainNode).connect(audio.destination);
+  track2.connect(gainNode2).connect(audio.destination);
+}
 
 
-// // ウィンドウ全体でマウスの動きを監視
-// window.addEventListener('mousemove', (event) => {
-//   // マウスのX座標を取得
-//   const mouseX = event.clientX;
-
-//   // ウィンドウの幅を取得
-//   const windowWidth = window.innerWidth;
-
-//   // 音量を0～1の範囲にマッピング
-//   const volume = Math.min(Math.max(mouseX / windowWidth, 0), 1);
-
-//   // 音量を設定
-//   audio.volume = volume;
-
-//   console.log(`Volume: ${volume}`); // デバッグ用に音量を表示
-// });
 // --- 動画ズーム機能 ---
 const video = document.querySelector('.video');
 const videoWrapper = document.querySelector('.video-wrapper');
@@ -162,7 +156,7 @@ videoWrapper.addEventListener('mousemove', function(e) {
   const offsetX = e.clientX;
   const offsetY = e.clientY;
   // ドラッグ量を計算
-  console.log(videoWrapper.clientWidth);
+  // console.log(videoWrapper.clientWidth);
   const dx = ((offsetX - dragStart.x) / videoWrapper.clientWidth) * 100 / (scale-1);
   const dy = ((offsetY - dragStart.y) / videoWrapper.clientHeight) * 100 / (scale-1);
   // originを移動
