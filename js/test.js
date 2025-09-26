@@ -6,19 +6,12 @@ const output = document.querySelector('#output');
 //マウス移動時
 document.onmousemove = onmousemove;
 onmousemove = function(e) {
-  output1.innerHTML = `x:` + e.pageX + ` y:` + e.pageY;
+  output1.innerHTML = `x:` + e.pageX + ` y:` + (e.pageY - 250);
   if (e.pageX < 200);
 
 
 }
 
-const audiodata = [
-  {x:50, y:600, tag:'audioElement'},
-  {x:1230, y:600, tag:'audioElement2'},
-  // {x:600, y:50, file:'audio/sample3.mp3'},
-  // {x:900, y:50, file:'audio/sample4.mp3'},
-  // {x:1200, y:50, file:'audio/sample5.mp3'},
-];
 
 // //マウス離脱時
 // document.onmouseout = onmouseout;
@@ -102,11 +95,57 @@ function updatePage(e) {
   track2.connect(gainNode2).connect(audio.destination);
 }
 
+const audiodata = [
+  {x:200, y:600, tag:'audioElement'},
+  {x:1080, y:120, tag:'audioElement2'},
+  // {x:600, y:50, file:'audio/sample3.mp3'},
+  // {x:900, y:50, file:'audio/sample4.mp3'},
+  // {x:1200, y:50, file:'audio/sample5.mp3'},
+];
 
 // --- 動画ズーム機能 ---
 const video = document.querySelector('.video');
 const videoWrapper = document.querySelector('.video-wrapper');
 let scale = 1;
+
+
+// const audiodata = [
+//   {x:50, y:600, tag:'audioElement'},
+//   {x:1230, y:600, tag:'audioElement2'},
+//   // {x:600, y:50, file:'audio/sample3.mp3'},
+//   // {x:900, y:50, file:'audio/sample4.mp3'},
+//   // {x:1200, y:50, file:'audio/sample5.mp3'},
+// ];
+
+// // 動画のtransform-originを基準に最も近いaudioを取得
+
+// const targetValue = {x: Xcenter, y: Ycenter};
+// // console.log(targetValue);
+
+// // x, y両方の距離（ユークリッド距離）で最も近いaudioを取得
+// const nearaudio = audiodata.reduce((prev, curr) => {
+//   const prevDist = Math.hypot(prev.x - targetValue.x, prev.y - targetValue.y);
+//   const currDist = Math.hypot(curr.x - targetValue.x, curr.y - targetValue.y);
+//   return currDist < prevDist ? curr : prev;
+// });
+
+// 結果: audioElement または audioElement2
+
+// // 三項演算子
+// // ある条件 ? 条件がtrueのときの値 : 条件がfalseのときの値
+// // 例:
+// // ある条件
+// const condition = (5 > 3);
+// // 条件がtrueのときの値
+// const exprIfTrue = '5は3より大きい';
+// // 条件がfalseのときの値
+// const exprIfFalse = '5は3より小さい';
+// // 三項演算子で値を決定 (この場合はexprIfTrueが代入される)
+
+// const kyori = condition ? exprIfTrue : exprIfFalse;
+
+
+
 
 video.addEventListener('wheel', function(e) {
   e.preventDefault();
@@ -166,10 +205,16 @@ videoWrapper.addEventListener('mousemove', function(e) {
   newX = Math.max(0, Math.min(newX, 100));
   newY = Math.max(0, Math.min(newY, 100));
   video.style.transformOrigin = `${newX}% ${newY}%`;
-  console.log(newX,newY);
-  output.innerHTML = `x:` + newX.toFixed(1) + ` y:` + newY.toFixed(1);
-  //scale*1/2
-  //scale-1
+
+  // 中心座標（ズーム・パン後のvideoの中心がvideoWrapper内でどこか）
+  // transform-origin（%）→ px
+  const centerOriginX = newX / 100 * videoWrapper.clientWidth;
+  const centerOriginY = newY / 100 * videoWrapper.clientHeight;
+  // ズーム倍率を考慮して中心座標を計算
+  const Xcenter = centerOriginX + (videoWrapper.clientWidth / 2 - centerOriginX) / scale;
+  const Ycenter = centerOriginY + (videoWrapper.clientHeight / 2 - centerOriginY) / scale;
+  console.log(Xcenter, Ycenter);
+  output.innerHTML = `中心座標: x:${Xcenter.toFixed(1)}px y:${Ycenter.toFixed(1)}px | origin: x:${newX.toFixed(1)}% y:${newY.toFixed(1)}%`;
 });
 
 
