@@ -48,6 +48,7 @@ const WIDTH = window.innerWidth;
 // ゲインの値を設定する
 document.onmousemove = updatePage;
 
+
 // // マウスベースで音量を変える
 // function updatePage(e) {
 //   curX = e.pageX;
@@ -69,6 +70,7 @@ document.onmousemove = updatePage;
 //   track.connect(gainNode).connect(audio.destination);
 //   track2.connect(gainNode2).connect(audio.destination);
 // }
+
 // origin基準で音量を変える
 function updatePage(e) {
   // マウスの位置は無視し、originXのみでゲインを決定
@@ -103,19 +105,23 @@ const audiodata = [
   // {x:1200, y:50, file:'audio/sample5.mp3'},
 ];
 
+let Xcenter = window.innerWidth / 2;
+let Ycenter = window.innerHeight / 2;
+
+// 動画の中心座標を更新する関数
+function setCenter(x, y) {
+  Xcenter = x;
+  Ycenter = y;
+  updatePage();
+}
+
 // --- 動画ズーム機能 ---
 const video = document.querySelector('.video');
 const videoWrapper = document.querySelector('.video-wrapper');
 let scale = 1;
-
-
-// const audiodata = [
-//   {x:50, y:600, tag:'audioElement'},
-//   {x:1230, y:600, tag:'audioElement2'},
-//   // {x:600, y:50, file:'audio/sample3.mp3'},
-//   // {x:900, y:50, file:'audio/sample4.mp3'},
-//   // {x:1200, y:50, file:'audio/sample5.mp3'},
-// ];
+////////////////////////////////
+// Todo ズームによる音量変化を追加
+////////////////////////////////
 
 // // 動画のtransform-originを基準に最も近いaudioを取得
 
@@ -211,11 +217,38 @@ videoWrapper.addEventListener('mousemove', function(e) {
   const centerOriginX = newX / 100 * videoWrapper.clientWidth;
   const centerOriginY = newY / 100 * videoWrapper.clientHeight;
   // ズーム倍率を考慮して中心座標を計算
-  const Xcenter = centerOriginX + (videoWrapper.clientWidth / 2 - centerOriginX) / scale;
-  const Ycenter = centerOriginY + (videoWrapper.clientHeight / 2 - centerOriginY) / scale;
-  console.log(Xcenter, Ycenter);
-  output.innerHTML = `中心座標: x:${Xcenter.toFixed(1)}px y:${Ycenter.toFixed(1)}px | origin: x:${newX.toFixed(1)}% y:${newY.toFixed(1)}%`;
+  const Xc = centerOriginX + (videoWrapper.clientWidth / 2 - centerOriginX) / scale;
+  const Yc = centerOriginY + (videoWrapper.clientHeight / 2 - centerOriginY) / scale;
+  setCenter(Xc, Yc);
+  output.innerHTML = `中心座標: x:${Xc.toFixed(1)}px y:${Yc.toFixed(1)}px | origin: x:${newX.toFixed(1)}% y:${newY.toFixed(1)}%`;
 });
+
+// --- 音量制御 ---
+function updatePage() {
+  // 最大距離（例えば画面対角線長）で正規化
+  const maxDist = Math.hypot(window.innerWidth, window.innerHeight);
+
+  // 各音源との距離を計算し、近いほど音量が大きくなるように
+  const dist1 = Math.hypot(Xcenter - audiodata[0].x, Ycenter - audiodata[0].y);
+  const dist2 = Math.hypot(Xcenter - audiodata[1].x, Ycenter - audiodata[1].y);
+
+  // 拡大率が上がるほど音量を下げる（例: 1/scale で減衰）
+  const scaleAttenuation = 1 / scale;
+
+  // 距離が0なら1、最大距離なら0
+  let gainValue1 = (1 - (dist1 / maxDist)) * scaleAttenuation;
+  let gainValue2 = (1 - (dist2 / maxDist)) * scaleAttenuation;
+
+  // 0～1にクリップ
+  gainValue1 = Math.max(0, Math.min(gainValue1, 1));
+  gainValue2 = Math.max(0, Math.min(gainValue2, 1));
+
+  gainNode.gain.value = gainValue1;
+  gainNode2.gain.value = gainValue2;
+
+  track.connect(gainNode).connect(audio.destination);
+  track2.connect(gainNode2).connect(audio.destination);
+}
 
 
 
