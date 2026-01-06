@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>AudioZoom Live Video</title>
+	<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+	<style>
+		body {
+			margin: 0;
+			padding: 20px;
+			background-color: #f0f0f0;
+			font-family: Arial, sans-serif;
+		}
+		.container {
+			max-width: 800px;
+			margin: 0 auto;
+			background-color: white;
+			padding: 20px;
+			border-radius: 8px;
+			box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+		}
+		h1 {
+			color: #333;
+			margin-top: 0;
+		}
+		video {
+			width: 100%;
+			height: auto;
+			background-color: #000;
+			border-radius: 4px;
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<h1>AudioZoom Live Video</h1>
+		<video id="video" controls></video>
+	</div>
+
+	<script>
+		const video = document.getElementById('video');
+		const url = './live/output.m3u8';
+
+		if (Hls.isSupported()) {
+			const hls = new Hls();
+			hls.loadSource(url);
+			hls.attachMedia(video);
+		} else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+			video.src = url;
+		}
+	</script>
+</body>
+</html>
