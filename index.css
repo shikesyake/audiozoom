@@ -28,7 +28,7 @@ body{
   align-items: center;
 }
 
-.video {
+video {
   width: 1280px;         /* 動画と同じ幅 */
   height: 720px;          /* 必要に応じて高さも指定 */
   transition: transform 0.2s;

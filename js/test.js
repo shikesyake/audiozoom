@@ -20,33 +20,57 @@ onmousemove = function(e) {
 
 const audio = new AudioContext(); // 音声ファイルを指定
 
-const videoElement = document.querySelector('#video');
-const audioElement = document.querySelector('#audio');
-const audioElement2 = document.querySelector('#audio2');
+
+const video = document.getElementById('video');
+const audio1 = document.getElementById('audio1');
+const audio2 = document.getElementById('audio2');
 
 // const track3 = audio.createMediaElementSource(videoElement);
-const track = audio.createMediaElementSource(audioElement);
-const track2 = audio.createMediaElementSource(audioElement2);
+const track1 = audio.createMediaElementSource(audio1);
+const track2 = audio.createMediaElementSource(audio2);
 
-const gainNode = audio.createGain();
+const gainNode1 = audio.createGain();
 const gainNode2 = audio.createGain();
 
-track.connect(gainNode).connect(audio.destination);
+track1.connect(gainNode1).connect(audio.destination);
 track2.connect(gainNode2).connect(audio.destination);
 
 audio.loop = true; // ループ再生を有効化
 
+
+const vidurl = './live/output.m3u8';
+const audiourl1 = './live/output.m3u8';
+const audiourl2 = './live/output.m3u8';
+
+if (Hls.isSupported()) {
+	const vidhls = new Hls();
+	vidhls.loadSource(vidurl);
+	vidhls.attachMedia(video);
+
+	const audiohls1 = new Hls();
+	audiohls1.loadSource(audiourl1);
+	audiohls1.attachMedia(audio1);
+	
+	const audiohls2 = new Hls();
+	audiohls2.loadSource(audiourl2);
+	audiohls2.attachMedia(audio2);
+	
+} else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+	video.src = vidurl;
+	audio1.src = audiourl1;
+	audio2.src = audiourl2;
+}
 document.getElementById('play_btn')
   .addEventListener('click', function() {
     audio.resume().then(() => {
-      videoElement.currentTime = 1.17;
-      videoElement.volume = 0.0;
-      videoElement.play();
+      video.currentTime = 1.17;
+      video.volume = 0.0;
+      video.play();
       
-      audioElement.play();
-      // audioElement.currentTime = 6;
-      audioElement2.play();
-      // audioElement2.currentTime = 5.86;
+      audio1.play();
+      // audio1.currentTime = 6;
+      audio2.play();
+      // audio2.currentTime = 5.86;
 
     });
   }, false);
@@ -106,7 +130,7 @@ function updatePage(e) {
   // 最大距離
 const maxDist = 800;
 const audiodata = [
-  {x:200, y:600, tag:gainNode},
+  {x:200, y:600, tag:gainNode1},
   {x:1080, y:120, tag:gainNode2},
   // {x:600, y:50, file:'audio/sample3.mp3'},
   // {x:900, y:50, file:'audio/sample4.mp3'},
@@ -124,7 +148,7 @@ function setCenter(x, y) {
 }
 
 // --- 動画ズーム機能 ---
-const video = document.querySelector('.video');
+// const video = document.querySelector('.video');
 const videoWrapper = document.querySelector('.video-wrapper');
 let scale = 1;
 
