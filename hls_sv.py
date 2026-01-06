@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# キャッシュを無効にするHTTPサーバー（CORS対応、ストリーミング対応）
+# キャッシュ無効のHTTPサーバー（CORS対応、ストリーミング対応）
 
 from http.server import SimpleHTTPRequestHandler, HTTPServer
 import sys
@@ -35,9 +35,9 @@ class NoCacheHTTPRequestHandler(SimpleHTTPRequestHandler):
         mimetype = super().guess_type(path)
         
         # HLS関連ファイルのMIMEタイプを明示的に設定
-        if path.endswith('.m3u8'):
+        if path.endswith('.m3u8'): # type: ignore
             return 'application/vnd.apple.mpegurl'
-        elif path.endswith('.ts'):
+        elif path.endswith('.ts'): # type: ignore
             return 'video/mp2t'
         
         return mimetype
@@ -65,7 +65,7 @@ class NoCacheHTTPRequestHandler(SimpleHTTPRequestHandler):
 def run(server_class=HTTPServer, handler_class=NoCacheHTTPRequestHandler, port=8080):
     server_address = ('0.0.0.0', port)
     httpd = server_class(server_address, handler_class)
-    print(f'キャッシュ無効化サーバーを起動: http://0.0.0.0:{port}')
+    print(f'サーバーを起動: http://0.0.0.0:{port}')
     httpd.serve_forever()
 
 if __name__ == '__main__':
