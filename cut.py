@@ -16,7 +16,11 @@ import argparse
 
 # フーリエ変換をする関数
 def calc_fft(data, samplerate):
-    spectrum = fftpack.fft(data)                                     # 信号のフーリエ変換
+    # ハミング窓を適用してスペクトル漏れを軽減
+    window = np.hamming(len(data))
+    windowed_data = data * window
+    
+    spectrum = fftpack.fft(windowed_data)                            # 信号のフーリエ変換
     amp = np.sqrt((spectrum.real ** 2) + (spectrum.imag ** 2))       # 振幅成分
     amp = amp / (len(data) / 2)                                      # 振幅成分の正規化（辻褄合わせ）
     phase = np.arctan2(spectrum.imag, spectrum.real)                 # 位相を計算
@@ -48,7 +52,7 @@ parser = argparse.ArgumentParser(description='マイク入力をリアルタイ�
 parser.add_argument('-l', '--listdevices', action='store_true', help='利用可能なデバイス一覧を表示')
 parser.add_argument('-d', '--device', type=int, default=None, help='sounddeviceの入力デバイス番号')
 parser.add_argument('-p', '--pnum', type=int, default=None, help='出力パイプの末尾に付加する番号')
-parser.add_argument('-r', '--rate', type=int, default=44100, help='サンプリングレート (Hz)')
+parser.add_argument('-r', '--rate', type=int, default=48000, help='サンプリングレート (Hz)')
 parser.add_argument('-c', '--channels', type=int, default=1, help='チャンネル数')
 args = parser.parse_args()
 
@@ -75,10 +79,18 @@ step_duration = 0.01    # ステップ間隔（秒）
 window_samples = int(samplerate * window_duration)
 step_samples = int(samplerate * step_duration)
 
+# 検出パラメータ
+target_freq_min = 1996  # 目標周波数の下限 (Hz)
+target_freq_max = 2005  # 目標周波数の上限 (Hz)
+min_amplitude = 0.01    # 最小振幅のしきい値
+detection_count_threshold = 3  # 連続検出回数のしきい値
+
 print(f"\n分析パラメータ:")
 print(f"分析窓: {window_duration} 秒")
 print(f"ステップ間隔: {step_duration} 秒")
 print("-" * 50)
+detection_count = 0  # 連続検出カウント
+required_detections = 3  # 確定に必要な連続検出回数
 
 # 検出状態
 detected = False
@@ -146,10 +158,11 @@ try:
                         # パイプをオープン
                         output_pipe = open(pipe_path, 'wb')
                         
-                        # WAVヘッダーを作成して送信
+                        # WAVヘッダーを作成して送信（検知瞬間からのため、バッファはクリア）
                         bio = io.BytesIO()
-                        buffer_array = np.array(buffer, dtype=np.int16)
-                        sf.write(bio, buffer_array.astype(np.float32) / np.iinfo(np.int16).max, 
+                        # 空のダミーデータでヘッダーを作成
+                        dummy = np.array([0], dtype=np.int16)
+                        sf.write(bio, dummy.astype(np.float32) / np.iinfo(np.int16).max, 
                                 samplerate, format='WAV', subtype='PCM_16')
                         bio.seek(0)
                         wav_header = bio.read(44)
@@ -160,10 +173,9 @@ try:
                         output_pipe.write(temp_header)
                         output_pipe.flush()
                         
-                        # バッファ内のデータを送信
-                        output_pipe.write(buffer_array.tobytes())
-                        output_pipe.flush()
-                        all_data.extend(buffer)
+                        # 検知前のバッファはクリア（検知瞬間からのデータのみ保存）
+                        buffer.clear()
+                        all_data.clear()
                         
                     elif detected:
                         # 検出後は受信データをそのままパイプに送信
@@ -173,8 +185,11 @@ try:
                         output_pipe.flush()
                         all_data.extend(send_samples)
                     
-                    # バッファをスライド
-                    buffer = buffer[step_samples:]
+                    # バッファをスライド（検出前は通常通り、検出後は送信済みデータを削除）
+                    if detected:
+                        buffer = buffer[step_samples:]
+                    else:
+                        buffer = buffer[step_samples:]
                     time_counter += step_duration
                     
             except Empty:
