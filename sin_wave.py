@@ -2,7 +2,7 @@ import numpy as np
 import sounddevice as sd
 import time
 
-def play_sine_wave(frequency, duration=1.0, sample_rate=44100, amplitude=0.3):
+def play_sine_wave(frequency, duration=0.5, sample_rate=44100, amplitude=0.3):
     """
     指定された周波数の正弦波を再生する
     
@@ -22,7 +22,7 @@ def play_sine_wave(frequency, duration=1.0, sample_rate=44100, amplitude=0.3):
     sd.play(wave, sample_rate)
     sd.wait()  # 再生完了まで待機
 
-def main():
+def main(duration=1.0):
     print("周波数を入力してください (終了するには 'q' を入力):")
     
     while True:
@@ -39,7 +39,7 @@ def main():
                 print("正の数値を入力してください。")
                 continue
             
-            print(f"{frequency} Hzの正弦波を2秒間再生します...")
+            print(f"{frequency} Hzの正弦波を{duration}秒間再生します...")
             play_sine_wave(frequency)
             print("再生完了")
             

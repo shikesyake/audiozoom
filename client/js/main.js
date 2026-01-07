@@ -38,9 +38,9 @@ track2.connect(gainNode2).connect(audio.destination);
 audio.loop = true; // ループ再生を有効化
 
 
-const vidurl = './live/output.m3u8';
-const audiourl1 = './live/output.m3u8';
-const audiourl2 = './live/output.m3u8';
+const vidurl = '../live/video/video.m3u8';
+const audiourl1 = '../live/audio1/audio.m3u8';
+const audiourl2 = '../live/audio2/audio.m3u8';
 
 if (Hls.isSupported()) {
 	const vidhls = new Hls();
