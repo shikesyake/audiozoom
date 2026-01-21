@@ -3,12 +3,41 @@
 
 from http.server import SimpleHTTPRequestHandler, HTTPServer
 import sys
+import os
 from datetime import datetime
+from urllib.parse import unquote
 
 class NoCacheHTTPRequestHandler(SimpleHTTPRequestHandler):
     
     # リクエストログを簡潔にする
     request_count = {'m3u8': 0, 'ts': 0, 'other': 0}
+    
+    # def translate_path(self, path):
+    #     """パスを実際のファイルパスに変換"""
+    #     # クエリパラメータを除去
+    #     path = path.split('?', 1)[0]
+    #     path = path.split('#', 1)[0]
+    #     path = unquote(path)
+        
+    #     # ルーティング処理
+    #     if path == '/':
+    #         path = '/client/index.html'
+    #     elif path == '/admin':
+    #         path = '/client/admin.html'
+    #     elif path.startswith('/js/') or path.startswith('/css/') or path.endswith('.css'):
+    #         # /js/や/css/で始まるパス、.cssで終わるパスを/client/配下に変換
+    #         if not path.startswith('/client/'):
+    #             path = '/client' + path
+        
+    #     # 絶対パスに変換
+    #     words = path.split('/')
+    #     words = filter(None, words)
+    #     path = os.getcwd()
+    #     for word in words:
+    #         if os.path.dirname(word) or word in (os.curdir, os.pardir):
+    #             continue
+    #         path = os.path.join(path, word)
+    #     return path
     
     def end_headers(self):
         # キャッシュを無効にするヘッダー
