@@ -4,25 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AudioZoom</title>
-    <link rel="stylesheet" href="index.css"/>
+    <link href="https://vjs.zencdn.net/7.20.3/video-js.css" rel="stylesheet" />
 	  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script src="https://vjs.zencdn.net/7.20.3/video.js"></script>
+		<link rel="stylesheet" href="index.css"/>
 </head>
 <body>
+    <header>
+        <h1><a href="/index.html" class="head1">AudioZoom</a></h1>
+        <a href="/admin" class="admin-link">管理画面</a>
+    </header>
     <p id="output"></p>
     <p id="output1"></p>
     <hr>
-    <button id="play_btn">play</button>
-    <div class="media">
+		<figcaption>動画:</figcaption><br>
+			<div class="video-wrapper">
+                <button id="play_btn">play</button>
+				<video id="video" class="video-js vjs-default-skin" controls preload="auto" width="1280" height="720"></video>
+			<!-- <video id="video" class="video" src="./media/サンプル動画のコピー.mp4"></video> -->
+			</div>
+		<div class="media">
     <div><figcaption>左:</figcaption>
         <audio id="audio1" controls preload="metadata"></audio></div>
     <div><figcaption>右:</figcaption>
         <audio id="audio2" controls preload="metadata"></audio></div>
     </div>
-        <div><figcaption>動画:</figcaption>
-        <div class="video-wrapper">
-            <video id="video"></video>
-            <!-- <video id="video" class="video" src="./media/サンプル動画のコピー.mp4"></video> -->
-        </div>
+
     </div>
 
 		<!-- <video id="audio_left" controls> -->

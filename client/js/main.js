@@ -8,20 +8,25 @@ document.onmousemove = onmousemove;
 onmousemove = function(e) {
   output1.innerHTML = `x:` + e.pageX + ` y:` + (e.pageY - 250);
   if (e.pageX < 200);
-
-
 }
-
-// //マウス離脱時
-// document.onmouseout = onmouseout;
-// onmouseout = function(e) {
-//   output.innerHTML = ``;
-// }
 
 const audio = new AudioContext(); // 音声ファイルを指定
 
+// Video.jsプレーヤーの初期化
+const player = videojs('video', {
+  controls: true,
+  autoplay: false,
+  preload: 'auto',
+  width: 1280,
+  height: 720,
+  html5: {
+    hls: {
+      overrideNative: true
+    }
+  }
+});
 
-const video = document.getElementById('video');
+const video = player.el().querySelector('video');
 const audio1 = document.getElementById('audio1');
 const audio2 = document.getElementById('audio2');
 
@@ -37,16 +42,17 @@ track2.connect(gainNode2).connect(audio.destination);
 
 audio.loop = true; // ループ再生を有効化
 
+const vidurl = '../../live/video/video.m3u8';
+const audiourl1 = '../../live/audio1/audio.m3u8';
+const audiourl2 = '../../live/audio2/audio.m3u8';
 
-const vidurl = '../live/video/video.m3u8';
-const audiourl1 = '../live/audio1/audio.m3u8';
-const audiourl2 = '../live/audio2/audio.m3u8';
+// Video.jsでHLS対応
+player.src({
+  src: vidurl,
+  type: 'application/x-mpegURL'
+});
 
 if (Hls.isSupported()) {
-	const vidhls = new Hls();
-	vidhls.loadSource(vidurl);
-	vidhls.attachMedia(video);
-
 	const audiohls1 = new Hls();
 	audiohls1.loadSource(audiourl1);
 	audiohls1.attachMedia(audio1);
@@ -54,109 +60,38 @@ if (Hls.isSupported()) {
 	const audiohls2 = new Hls();
 	audiohls2.loadSource(audiourl2);
 	audiohls2.attachMedia(audio2);
-	
-} else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-	video.src = vidurl;
+} else if (audio1.canPlayType('application/vnd.apple.mpegurl')) {
 	audio1.src = audiourl1;
 	audio2.src = audiourl2;
 }
+
 document.getElementById('play_btn')
   .addEventListener('click', function() {
+    const btn = this;
     audio.resume().then(() => {
-      video.currentTime = 1.17;
-      video.volume = 0.0;
-      video.play();
+      btn.style.display = 'none';
+      player.currentTime(1.17);
+      player.volume(0);
+      player.play();
       
       audio1.play();
-      // audio1.currentTime = 6;
       audio2.play();
-      // audio2.currentTime = 5.86;
-
     });
   }, false);
 
   
 
-let curX;
-const WIDTH = window.innerWidth;
-
-// マウスが動いたら新しいX座標を取得し、
-// ゲインの値を設定する
-document.onmousemove = updatePage;
-
-
-// // マウスベースで音量を変える
-// function updatePage(e) {
-//   curX = e.pageX;
-//   // gainNode.gain.value = curX / WIDTH;
-//   // track.connect(gainNode).connect(audio.destination);
-
-//   // audioのゲイン（X座標が右に行くほど音量が上がる）
-//   const gainValue1 = curX / WIDTH;
-//   // const gainValue1 = 0.3;
-//   //console.log(gainNode.gain.value,gainNode.gain.maxValue,gainNode.gain.minValue)
-//   gainNode.gain.value = gainValue1;
-  
-//   // audio2のゲイン（X座標が左に行くほど音量が上がる）
-//   const gainValue2 = 1 - (curX / WIDTH);
-//   // const gainValue2 = 0;
-//   gainNode2.gain.value = gainValue2;
-  
-//   console.log(gainValue1,gainValue2);
-//   track.connect(gainNode).connect(audio.destination);
-//   track2.connect(gainNode2).connect(audio.destination);
-// }
-
-// origin基準で音量を変える
-function updatePage(e) {
-  // originXの位置でゲインを決定
-  let originX = window.innerWidth / 2;
-  let originY = window.innerHeight / 2;
-  if (video && video.style.transformOrigin) {
-    const [ox, oy] = video.style.transformOrigin.split(' ');
-    if (ox.endsWith('%')) {
-      originX = (parseFloat(ox) / 100) * window.innerWidth;
-    } else if (ox.endsWith('px')) {
-      originX = parseFloat(ox);
-    }
-    if (oy.endsWith('%')) {
-      originY = (parseFloat(oy) / 100) * window.innerHeight;
-    } else if (oy.endsWith('px')) {
-      originY = parseFloat(oy);
-    }
-  }
-}
-
-  // 最大距離
-const maxDist = 800;
-const audiodata = [
-  {x:200, y:600, tag:gainNode1},
-  {x:1080, y:120, tag:gainNode2},
-  // {x:600, y:50, file:'audio/sample3.mp3'},
-  // {x:900, y:50, file:'audio/sample4.mp3'},
-  // {x:1200, y:50, file:'audio/sample5.mp3'},
-];
-
-let Xcenter = window.innerWidth / 2;
-let Ycenter = window.innerHeight / 2;
-
-// 動画の中心座標を更新する関数
-function setCenter(x, y) {
-  Xcenter = x;
-  Ycenter = y;
-  updatePage();
-}
-
 // --- 動画ズーム機能 ---
 // const video = document.querySelector('.video');
 const videoWrapper = document.querySelector('.video-wrapper');
+const videoElement = document.querySelector('#video'); // Video.js要素
 let scale = 1;
 
-video.addEventListener('wheel', function(e) {
+videoElement.addEventListener('wheel', function(e) {
   e.preventDefault();
 
   // videoWrapper内でのマウス座標を取得
-  const rect = video.getBoundingClientRect();
+  const rect = videoElement.getBoundingClientRect();
   const wrapperRect = videoWrapper.getBoundingClientRect();
   const offsetX = e.clientX - rect.left;
   const offsetY = e.clientY - rect.top;
@@ -164,7 +99,7 @@ video.addEventListener('wheel', function(e) {
   const percentY = (offsetY / rect.height) * 100;
 
   // transform-originをマウス位置に
-  video.style.transformOrigin = `${percentX}% ${percentY}%`;
+  videoElement.style.transformOrigin = `${percentX}% ${percentY}%`;
 
   // ホイール上で拡大、下で縮小
   if (e.deltaY < 0) {
@@ -174,7 +109,7 @@ video.addEventListener('wheel', function(e) {
   }
   // 最小・最大倍率を制限（最小1に変更）
   scale = Math.max(1, Math.min(scale, 5));
-  video.style.transform = `scale(${scale})`;
+  videoElement.style.transform = `scale(${scale})`;
 });
 
 let isDragging = false;
@@ -186,8 +121,8 @@ videoWrapper.addEventListener('mousedown', function(e) {
   dragStart.x = e.clientX;
   dragStart.y = e.clientY;
   // ドラッグ開始時のoriginを記録
-  origin.x = parseFloat(video.style.transformOrigin.split('%')[0]) || 50;
-  origin.y = parseFloat(video.style.transformOrigin.split('%')[1]) || 50;
+  origin.x = parseFloat(videoElement.style.transformOrigin.split('%')[0]) || 50;
+  origin.y = parseFloat(videoElement.style.transformOrigin.split('%')[1]) || 50;
 });
 
 document.addEventListener('mouseup', function(e) {
@@ -209,7 +144,7 @@ videoWrapper.addEventListener('mousemove', function(e) {
   // 0～100%に制限
   newX = Math.max(0, Math.min(newX, 100));
   newY = Math.max(0, Math.min(newY, 100));
-  video.style.transformOrigin = `${newX}% ${newY}%`;
+  videoElement.style.transformOrigin = `${newX}% ${newY}%`;
 
   // 中心座標（ズーム・パン後のvideoの中心がvideoWrapper内でどこか）
   // transform-origin（%）→ px
@@ -233,4 +168,20 @@ videoWrapper.addEventListener('mousemove', function(e) {
   setCenter(Xc, Yc);
   output.innerHTML = `中心座標: x:${Xc.toFixed(1)}px y:${Yc.toFixed(1)}px | origin: x:${newX.toFixed(1)}% y:${newY.toFixed(1)}%`;
 });
+
+// 最大距離
+const maxDist = 800;
+const audiodata = [
+  {x:200, y:600, tag:gainNode1},
+  {x:1080, y:120, tag:gainNode2},
+];
+
+let Xcenter = window.innerWidth / 2;
+let Ycenter = window.innerHeight / 2;
+
+// 動画の中心座標を更新する関数
+function setCenter(x, y) {
+  Xcenter = x;
+  Ycenter = y;
+}
 
