@@ -204,7 +204,7 @@ except Exception as e:
 finally:
     if output_pipe:
         output_pipe.close()
-        print(f"named_pipeへの送信完了")
+        print(f"named_pipeへの送信を終了")
     
     # 保存用データの処理
     if detected and all_data:

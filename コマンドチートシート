@@ -1,0 +1,74 @@
+#カメラデバイス一覧
+ffmpeg -f avfoundation -list_devices true -i ""
+
+#録音、音合わせ
+python3 cut.py -l
+python3 cut.py -d x -p 1
+python3 cut.py -d x -p 2
+
+# hlsを生成
+python3 ./stream.py -l
+python3 ./stream.py -vd x
+python3 ./stream.py -p 1
+python3 ./stream.py -p 2
+
+#鯖
+python3 ./hls_sv.py
+
+#動画のみ本体
+ffmpeg \
+	-framerate 30.000000 \
+	-f avfoundation \
+	-pix_fmt uyvy422 \
+	-thread_queue_size 8192 \
+	-i "0" -vcodec libx264 \
+	-preset ultrafast \
+	-tune zerolatency \
+	-vsync cfr -r 30 -g 30 \
+	-f hls -hls_time 4 -hls_list_size 5 -hls_delete_threshold 2 -hls_flags delete_segments \
+	-hls_segment_filename /Users/shike/git/audiozoom/live/video/"video%4d.ts" /Users/shike/git/audiozoom/live/video/video.m3u8
+
+# -hls_time was 1 or 4 or 5 or 11
+# -hls_list_size was 3 - 5
+# -hls_delete_threshold was 2 - 3 
+# -hls_playlist_type event 
+# -vf crop=1552:873:0:339
+
+
+#本体
+ffmpeg \
+	-framerate 30.000000 \
+	-f avfoundation \
+	-pix_fmt uyvy422 \
+	-thread_queue_size 8192 \
+	-i "0:2" -vcodec libx264 \
+	-preset ultrafast \
+	-tune zerolatency \
+	-vsync cfr -r 30 -g 30 -acodec aac \
+	-f hls -hls_time 4 -hls_list_size 5 -hls_delete_threshold 2 -hls_flags delete_segments \
+	-hls_segment_filename /Users/shike/git/audiozoom/live/video/"video%4d.ts" /Users/shike/git/audiozoom/live/video/video.m3u8
+
+
+ffmpeg \
+	-framerate 30.000000 \  # カメラのフレームレート
+	-f avfoundation \       # Appleの動画配信用の形式
+	-pix_fmt uyvy422 \      # カメラのピクセルフォーマット
+	-thread_queue_size 8192 
+	-i "0:1" \  # デバイス名 -i "FaceTime HD Camera (Built-in):Built-in Microphone" \  # デバイス名
+	-vcodec libx264 \     # ビデオコーデックにx264を使う
+	-preset ultrafast \   # 低遅延用なプリセット
+	-tune zerolatency \   # 低遅延用のチューニング
+	-f mpegts \           # MPEG transport stream
+  "udp://192.168.1.100:12000?pkt_size=1316" # 送信先のアドレス、ポートとパケットサイズ
+	#-f hls "rtmp://192.168.1.100:12000?pkt_size=1316"	
+
+ffmpeg 
+-framerate 30.000000 
+-f avfoundation 
+-pix_fmt uyvy422 
+-thread_queue_size 8192 
+-i "0:2"
+-c:v libx264 -preset ultrafast -tune zerolatency 
+-hls_time 5 -hls_list_size 0 -hls_flags delete_segments -f hls output.m3u8
+
+ffplay -fflags nobuffer udp://192.168.1.100:12000
