@@ -1,115 +1,50 @@
-header {
-    background-color: #2c3e50;
-    color: white;
-    padding: 10px 20px;
-    text-align: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    position: relative;
+.wrap {
+  cursor: none;
 }
 
-header h1 {
-    margin: 1px;
-    font-size: 2em;
-    font-weight: 600;
+.item {
+  pointer-events: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  opacity: 0;
+}
+.item-01 {
+  z-index: 103;
+  transition: opacity 0.2s;
+}
+.item-02 {
+  z-index: 102;
+  transition: all 0.2s;
+}
+.item-03 {
+  z-index: 101;
+  transition: all 0.4s;
+}
+.item.active {
+  opacity: 1;
 }
 
-body{
-    padding:0;
-    margin:0;
-  }
-
-
-.admin-link {
-    position: absolute;
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: white;
-    text-decoration: none;
-    padding: 8px 16px;
-    background-color: #34495e;
-    border-radius: 4px;
-    font-size: 0.9em;
-    transition: background-color 0.3s;
-}
-
-.admin-link:hover {
-    background-color: #4a6278;
-}
-
-.head1 {
-    position: center;
-    top: 50%;
-    transform: translateY(-50%);
-    color: white;
-    text-decoration: none;
-    border-radius: 2px;
-    font-size: 0.9em;
-    transition: background-color 0.3s;
-}
-/* index */
-figure {
-    margin: 0;
-
-  }
-
-#output{
-    margin:10px;
-    height: 1.5em;
-    font-size:25px;
-}
-
-#output1{
-    margin:10px;
-    height: 1.5em;
-    font-size:20px;
-}
-.media {
-		display: flex;
-	}
-
-.video-wrapper {
-  width: 1280px;         /* 動画と同じ幅 */
-  height: 720px;          /* 必要に応じて高さも指定 */
-  overflow: hidden;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-}
-
-#play_btn {
-  position: absolute;
-  top: 50%;
-  left: 50%;
+.interior {
   transform: translate(-50%, -50%);
-  z-index: 100;
-  padding: 15px 30px;
-  font-size: 20px;
-  background-color: rgba(0, 0, 0, 0.7);
-  color: white;
-  border: 2px solid white;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: background-color 0.3s;
+  transition: all 0.2s;
+  border-radius: 50%;
 }
-
-#play_btn:hover {
-  background-color: rgba(0, 0, 0, 0.9);
+.interior-01 {
+  width: 2em;
+  height: 2em;
+  background: #845080;
 }
-
-.video-js .vjs-big-play-button {
-	
-  background-color: #B37D5B;
-	display: none;
-  opacity: .6;
+.interior-01::before {
+  content: "";
 }
-
-video {
-  width: 1280px;         /* 動画と同じ幅 */
-  height: 720px;          /* 必要に応じて高さも指定 */
-  transition: transform 0.2s;
-  display: flex;
-  /* transform-origin: center center; */
-  user-select: none;
+.interior-02 {
+  width: 3em;
+  height: 3em;
+  background: #e7d4e3;
 }
+.interior-03 {
+  width: 4em;
+  height: 4em;
+  border: 1px solid #a675a5;
+}/*# sourceMappingURL=index.css.map */

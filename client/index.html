@@ -7,13 +7,25 @@
     <link href="https://vjs.zencdn.net/7.20.3/video-js.css" rel="stylesheet" />
 	  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://vjs.zencdn.net/7.20.3/video.js"></script>
-		<link rel="stylesheet" href="index.css"/>
+		<link rel="stylesheet" href="/index.css"/>
 </head>
 <body>
     <header>
         <h1><a href="/index.html" class="head1">AudioZoom</a></h1>
-        <a href="/admin" class="admin-link">管理画面</a>
+		<a href="/admin" class="admin-link">管理画面</a>
+        <a href="/users" class="admin-link">👥 ユーザーDB</a>
     </header>
+    
+    <div style="padding: 20px; background:#f5f5f5; margin:10px;border-radius:6px;">
+        <h3>📺 メディアソース選択</h3>
+        <select id="media_select" style="padding:8px; border:1px solid #ddd; border-radius:4px; width:100%; max-width:500px;">
+            <option value="">-- メディアを選択してください --</option>
+            {% for media in media_list %}
+            <option value="{{ media.relative_path }}" data-type="{{ media.media_type }}">{{ media.media_name }}</option>
+            {% endfor %}
+        </select>
+        <p style="font-size:0.9em; color:#666;margin-top:8px;">合計: {{ media_list|length }} 個のメディアソース</p>
+    </div>
     <p id="output"></p>
     <p id="output1"></p>
     <hr>
@@ -45,6 +57,6 @@
 			video.src = url;
 		}
 		</script> -->
-		<script src="js/main.js"></script>
+		<script src="/js/main.js"></script>
 </body>
 </html>

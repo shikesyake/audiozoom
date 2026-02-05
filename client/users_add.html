@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ユーザー追加</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .nav {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .nav a {
+            display: inline-block;
+            margin: 0 10px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            transition: all 0.3s;
+        }
+        .nav a:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        form {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .form-group {
+            margin-bottom: 25px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+        }
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        button[type="submit"] {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        button[type="submit"]:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .info {
+            background-color: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2196F3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>➕ ユーザー追加</h1>
+        <p class="subtitle">新しいユーザーをデータベースに登録</p>
+        
+        <div class="nav">
+            <a href="/">🏠 ホーム</a>
+            <a href="/users">📋 ユーザー一覧</a>
+            <a href="/users/search">🔍 検索</a>
+        </div>
+
+        <!-- <div class="info">
+            <strong>💡 ヒント:</strong> プレースホルダを使用してSQLインジェクションを防いでいます
+        </div> -->
+
+        <form action="/users/add" method="post">
+            <div class="form-group">
+                <label for="name">名前 *</label>
+                <input type="text" id="name" name="name" required placeholder="ユーザー名を入力">
+            </div>
+
+            <div class="form-group">
+                <label for="level">レベル *</label>
+                <input type="number" id="level" name="level" required min="1" max="99" placeholder="1〜99" value="1">
+            </div>
+
+            <div class="form-group">
+                <label for="job_id">職業（任意）</label>
+                <select id="job_id" name="job_id">
+                    <option value="">-- 未設定 --</option>
+                    {% for job in jobs %}
+                    <option value="{{ job.id }}">{{ job.job_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button type="submit">👥 ユーザーを追加</button>
+        </form>
+    </div>
+</body>
+</html>

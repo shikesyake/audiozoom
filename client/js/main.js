@@ -1,5 +1,49 @@
 window.AudioContext = window.AudioContext || window.webkitAudioContext;
 
+// --- メディアソース選択 ---
+const mediaSelect = document.getElementById('media_select');
+
+if (mediaSelect) {
+  mediaSelect.addEventListener('change', function() {
+    const selectedPath = this.value;
+    const selectedType = this.options[this.selectedIndex]?.dataset.type;
+    
+    if (!selectedPath) {
+      console.log('メディアが選択されていません');
+      return;
+    }
+    
+    console.log('選択されたメディア:', selectedPath, 'タイプ:', selectedType);
+    
+    if (selectedType === 'hls') {
+      // HLS形式
+      const fullPath = '/' + selectedPath;
+      player.src({
+        src: fullPath,
+        type: 'application/x-mpegURL'
+      });
+      if (document.getElementById('play_btn').style.display !== 'none') {
+        player.play();
+      }
+    } else if (selectedType === 'video') {
+      // 動画ファイル（mp4など）
+      const fullPath = '/' + selectedPath;
+      player.src({
+        src: fullPath,
+        type: 'video/mp4'
+      });
+      if (document.getElementById('play_btn').style.display !== 'none') {
+        player.play();
+      }
+    } else if (selectedType === 'audio') {
+      // 音声
+      const fullPath = '/' + selectedPath;
+      audio1.src = fullPath;
+      audio1.play();
+    }
+  });
+}
+
 //出力先
 const output = document.querySelector('#output');
 

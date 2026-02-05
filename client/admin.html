@@ -4,16 +4,88 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>管理画面 - AudioZoom</title>
-    <link rel="stylesheet" href="index.css"/>
+		<link rel="stylesheet" href="/index.css"/>
 </head>
 <body>
     <header>
         <h1>管理画面</h1>
         <a href="/" class="admin-link">メインページ</a>
+        <a href="/users" class="admin-link">ユーザー管理</a>
     </header>
     <div style="padding: 20px;">
         <h2>管理機能</h2>
         <p>管理画面の内容をここに追加します。</p>
+
+        <hr style="margin: 24px 0;">
+
+        <h2>メディア管理</h2>
+        <p>配信サーバーのIPアドレス/URLを指定してメディアソースを登録できます。</p>
+
+        <form action="/admin" method="post" style="max-width: 520px;">
+            <div style="margin-bottom: 12px;">
+                <label for="media_ip" style="display:block; font-weight:bold; margin-bottom:6px;">IPアドレス / URL</label>
+                <input id="media_ip" name="media_ip" type="text" placeholder="例: http://192.168.1.100" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px;">
+            </div>
+            <div style="margin-bottom: 12px;">
+                <label for="media_path" style="display:block; font-weight:bold; margin-bottom:6px;">メディアパス</label>
+                <input id="media_path" name="media_path" type="text" placeholder="例: /live/camera1/stream.m3u8" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px;">
+            </div>
+            <div style="margin-bottom: 12px;">
+                <label for="media_type" style="display:block; font-weight:bold; margin-bottom:6px;">メディア種別</label>
+                <select id="media_type" name="media_type" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:6px;">
+                    <option value="hls">HLS (m3u8)</option>
+                    <option value="video">動画 (mp4)</option>
+                    <option value="audio">音声</option>
+                </select>
+            </div>
+            <button type="submit" style="padding:10px 16px; border:none; border-radius:6px; background:#4caf50; color:#fff; cursor:pointer;">追加</button>
+        </form>
+
+        <hr style="margin: 24px 0;">
+
+        <h3>登録済みメディアソース</h3>
+        {% if media_list %}
+        <table style="width:100%; border-collapse:collapse; margin-top:12px;">
+            <thead>
+                <tr style="background:#667eea; color:#fff;">
+                    <th style="padding:12px; text-align:left; border:1px solid #ddd;">ID</th>
+                    <th style="padding:12px; text-align:left; border:1px solid #ddd;">メディア名</th>
+                    <th style="padding:12px; text-align:left; border:1px solid #ddd;">種別</th>
+                    <th style="padding:12px; text-align:left; border:1px solid #ddd;">パス</th>
+                    <th style="padding:12px; text-align:left; border:1px solid #ddd;">フォーマット</th>
+                    <th style="padding:12px; text-align:left; border:1px solid #ddd;">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for media in media_list %}
+                <tr style="border:1px solid #ddd;">
+                    <td style="padding:12px; border:1px solid #ddd;">{{ media.id }}</td>
+                    <td style="padding:12px; border:1px solid #ddd;">
+                        <input type="text" name="media_name" form="edit-{{ media.id }}" value="{{ media.media_name }}" style="width:100%; padding:6px;">
+                    </td>
+                    <td style="padding:12px; border:1px solid #ddd;">{{ media.media_type }}</td>
+                    <td style="padding:12px; border:1px solid #ddd;">
+                        <input type="text" name="relative_path" form="edit-{{ media.id }}" value="{{ media.relative_path }}" style="width:100%; padding:6px;">
+                    </td>
+                    <td style="padding:12px; border:1px solid #ddd;">
+                        <input type="text" name="file_format" form="edit-{{ media.id }}" value="{{ media.file_format }}" style="width:100%; padding:6px;">
+                    </td>
+                    <td style="padding:12px; border:1px solid #ddd;">
+                        <form id="edit-{{ media.id }}" action="/admin/media/update/{{ media.id }}" method="post" style="display:inline;">
+                            <button type="submit" style="padding:6px 10px; border:none; border-radius:6px; background:#1976d2; color:#fff; cursor:pointer;">更新</button>
+                        </form>
+                        <form action="/admin/media/delete/{{ media.id }}" method="post" style="display:inline;" onsubmit="return confirm('削除しますか？');">
+                            <button type="submit" style="padding:6px 10px; border:none; border-radius:6px; background:#e53935; color:#fff; cursor:pointer;">削除</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <p style="margin-top:12px; color:#666;">合計: {{ media_list|length }} 件のメディア</p>
+        {% else %}
+        <p style="color:#999;">登録済みのメディアソースはありません</p>
+        {% endif %}
     </div>
 </body>
 </html>

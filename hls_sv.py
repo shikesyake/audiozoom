@@ -7,6 +7,283 @@ import os
 from datetime import datetime
 from urllib.parse import unquote
 
+from flask import Flask, render_template, send_from_directory, request, redirect, url_for, session, flash
+from werkzeug.security import check_password_hash
+import mysql.connector
+import pymysql
+import pymysql.cursors
+import os
+
+app = Flask(
+    __name__,
+    template_folder='client',
+    static_folder='client',
+    static_url_path=''
+)
+app.secret_key = 'your_secret_key_here' # 本番環境では安全なキーに変更してください
+
+def get_db_connection():
+    return mysql.connector.connect(
+        host='localhost',
+        user='root',
+        password='',
+        database='mysql'
+    )
+
+def getConnection():
+    """PyMySQLでの接続 - Flask入門編3用"""
+    return pymysql.connect(
+        host="localhost",
+        db="user",
+        user="root",
+        password="",
+        charset="utf8",
+        cursorclass=pymysql.cursors.DictCursor
+    )
+
+@app.route('/')
+def index():
+    connection = getConnection()
+    sql = "SELECT id, media_name, relative_path, media_type FROM `broadcast_media` WHERE is_active = 1 ORDER BY id"
+    cursor = connection.cursor()
+    cursor.execute(sql)
+    media_list = cursor.fetchall()
+    cursor.close()
+    connection.close()
+    return render_template('index.html', media_list=media_list)
+
+@app.route('/admin/login', methods=['POST'])
+def login():
+    username = request.form.get('username', '')
+    password = request.form.get('password', '')
+
+    db = get_db_connection()
+    cursor = db.cursor(dictionary=True)
+    cursor.execute('SELECT * FROM users WHERE username = %s', (username,))
+    user = cursor.fetchone()
+    cursor.close()
+    db.close()
+
+    if user and check_password_hash(user['password'], password):
+        session['logged_in'] = True
+        session['username'] = user['username']
+        return redirect(url_for('admin'))
+
+    flash('ユーザー名またはパスワードが正しくありません。')
+    return redirect(url_for('admin'))
+
+@app.route('/logout')
+def logout():
+    session.pop('logged_in', None)
+    session.pop('username', None)
+    return redirect(url_for('admin'))
+@app.route('/livevid')
+def livevid():
+    return render_template('livevid.html')
+
+@app.route('/admin', methods=['GET', 'POST'])
+def admin():
+    if request.method == 'POST':
+        media_ip = request.form.get('media_ip', '').strip()
+        media_path = request.form.get('media_path', '').strip()
+        media_type = request.form.get('media_type', '').strip()
+        if media_ip and media_path:
+            connection = getConnection()
+            sql = "INSERT INTO `broadcast_media` (stream_id, media_name, media_type, relative_path, file_format, is_active) VALUES (NULL, %s, %s, %s, %s, 1)"
+            cursor = connection.cursor()
+            media_name = f"{media_ip} - {media_path}"
+            file_format = media_type if media_type in ('hls', 'video', 'audio') else 'unknown'
+            cursor.execute(sql, (media_name, media_type, media_path, file_format))
+            connection.commit()
+            cursor.close()
+            connection.close()
+            flash('メディアソースを登録しました。')
+        else:
+            flash('IPアドレス/URL とメディアパスを入力してください。')
+        return redirect(url_for('admin'))
+    
+    connection = getConnection()
+    sql = "SELECT id, media_name, media_type, relative_path, file_format FROM `broadcast_media` WHERE is_active = 1 ORDER BY id DESC"
+    cursor = connection.cursor()
+    cursor.execute(sql)
+    media_list = cursor.fetchall()
+    cursor.close()
+    connection.close()
+    
+    return render_template('admin.html', media_list=media_list)
+
+@app.route('/admin/media/update/<int:media_id>', methods=['POST'])
+def update_media(media_id):
+    media_name = request.form.get('media_name', '').strip()
+    relative_path = request.form.get('relative_path', '').strip()
+    file_format = request.form.get('file_format', '').strip()
+    if media_name and relative_path:
+        connection = getConnection()
+        sql = "UPDATE `broadcast_media` SET media_name = %s, relative_path = %s, file_format = %s WHERE id = %s"
+        cursor = connection.cursor()
+        cursor.execute(sql, (media_name, relative_path, file_format, media_id))
+        connection.commit()
+        cursor.close()
+        connection.close()
+        flash('メディアを更新しました。')
+    else:
+        flash('メディア名とパスは必須です。')
+    return redirect(url_for('admin'))
+
+@app.route('/admin/media/delete/<int:media_id>', methods=['POST'])
+def delete_media(media_id):
+    connection = getConnection()
+    sql = "DELETE FROM `broadcast_media` WHERE id = %s"
+    cursor = connection.cursor()
+    cursor.execute(sql, (media_id,))
+    connection.commit()
+    cursor.close()
+    connection.close()
+    flash('メディアを削除しました。')
+    return redirect(url_for('admin'))
+
+@app.route('/live/video/<path:filename>')
+def video(filename):
+    return send_from_directory('live/video', filename)
+
+@app.route('/live/audio/<path:filename>')
+def audio(filename):
+    return send_from_directory('live/audio', filename)
+
+@app.route('/live/<path:filename>')
+def live(filename):
+    return send_from_directory('live', filename)
+
+# ============ Flask入門編3: データベース学習用エンドポイント ============
+
+@app.route('/users/list')
+@app.route('/users_bak')
+@app.route('/users')
+def users():
+    """ユーザー一覧を表示（LEFT JOINでjobsテーブルと結合）"""
+    connection = getConnection()
+    
+    # LEFT JOINを使用してuserとjobsを結合
+    # DictCursorを使うため、カラム名の重複を避ける
+    sql = """
+        SELECT 
+            `user`.id as user_id,
+            `user`.name as user_name,
+            `user`.level as user_level,
+            jobs.job_name as job_name
+        FROM `user`
+        LEFT JOIN jobs ON `user`.job_id = jobs.id
+        ORDER BY `user`.id
+    """
+    
+    cursor = connection.cursor()
+    cursor.execute(sql)
+    users = cursor.fetchall()
+    cursor.close()
+    connection.close()
+    
+    return render_template("users_bak.html", users=users)
+
+@app.route('/users/search')
+def search_users():
+    """レベル範囲でユーザーを検索（GETパラメータ使用）"""
+    min_level = request.args.get("min_level", 0)
+    max_level = request.args.get("max_level", 100)
+    
+    connection = getConnection()
+    
+    # プレースホルダを使用して安全にSQLを構築
+    sql = """
+        SELECT 
+            `user`.id as user_id,
+            `user`.name as user_name,
+            `user`.level as user_level,
+            jobs.job_name as job_name
+        FROM `user`
+        LEFT JOIN jobs ON `user`.job_id = jobs.id
+        WHERE `user`.level >= %s AND `user`.level <= %s
+        ORDER BY `user`.id
+    """
+    
+    cursor = connection.cursor()
+    cursor.execute(sql, (min_level, max_level))
+    users = cursor.fetchall()
+    cursor.close()
+    connection.close()
+    
+    return render_template("users_search.html", users=users, 
+                          min_level=min_level, max_level=max_level)
+
+@app.route('/users/add', methods=['GET', 'POST'])
+def add_user():
+    """ユーザーを追加"""
+    if request.method == 'POST':
+        # POSTパラメータを受け取る
+        name = request.form["name"]
+        level = request.form["level"]
+        job_id = request.form.get("job_id")
+        
+        connection = getConnection()
+        
+        # プレースホルダを使用してINSERT
+        if job_id and job_id != "":
+            sql = "INSERT INTO `user` (name, level, job_id) VALUES (%s, %s, %s)"
+            cursor = connection.cursor()
+            cursor.execute(sql, (name, level, job_id))
+        else:
+            sql = "INSERT INTO `user` (name, level) VALUES (%s, %s)"
+            cursor = connection.cursor()
+            cursor.execute(sql, (name, level))
+        
+        # トランザクションをコミット
+        connection.commit()
+        cursor.close()
+        connection.close()
+        
+        return redirect(url_for('users'))
+    
+    else:
+        # GETリクエスト: フォームを表示するため職業リストを取得
+        connection = getConnection()
+        sql = "SELECT * FROM jobs ORDER BY id"
+        cursor = connection.cursor()
+        cursor.execute(sql)
+        jobs = cursor.fetchall()
+        cursor.close()
+        connection.close()
+        
+        return render_template("users_add.html", jobs=jobs)
+
+@app.route('/users/delete/<int:user_id>', methods=['POST'])
+def delete_user(user_id):
+    """ユーザーを削除"""
+    connection = getConnection()
+    sql = "DELETE FROM `user` WHERE id = %s"
+    cursor = connection.cursor()
+    cursor.execute(sql, (user_id,))
+    connection.commit()
+    cursor.close()
+    connection.close()
+    
+    return redirect(url_for('users'))
+
+@app.route('/result', methods=['POST'])
+def result():
+    """シンプルなフォーム送信結果（教材サンプル）"""
+    name = request.form["name"]
+    level = request.form["level"]
+    
+    connection = getConnection()
+    sql = "INSERT INTO `user` (name, level) VALUES (%s, %s)"
+    cursor = connection.cursor()
+    cursor.execute(sql, (name, level))
+    connection.commit()
+    cursor.close()
+    connection.close()
+    
+    return name + level
+
+
 class NoCacheHTTPRequestHandler(SimpleHTTPRequestHandler):
     
     # リクエストログを簡潔にする
