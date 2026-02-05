@@ -89,11 +89,11 @@ def admin():
         media_type = request.form.get('media_type', '').strip()
         if media_ip and media_path:
             connection = getConnection()
-            sql = "INSERT INTO `broadcast_media` (stream_id, media_name, media_type, relative_path, file_format, is_active) VALUES (NULL, %s, %s, %s, %s, 1)"
+            sql = "INSERT INTO `broadcast_media` (stream_id, media_name, server_address, media_type, relative_path, file_format, is_active) VALUES (NULL, %s, %s, %s, %s, %s, 1)"
             cursor = connection.cursor()
-            media_name = f"{media_ip} - {media_path}"
+            media_name = media_path.split('/')[-1]
             file_format = media_type if media_type in ('hls', 'video', 'audio') else 'unknown'
-            cursor.execute(sql, (media_name, media_type, media_path, file_format))
+            cursor.execute(sql, (media_name, media_ip, media_type, media_path, file_format))
             connection.commit()
             cursor.close()
             connection.close()
@@ -103,7 +103,7 @@ def admin():
         return redirect(url_for('admin'))
     
     connection = getConnection()
-    sql = "SELECT id, media_name, media_type, relative_path, file_format FROM `broadcast_media` WHERE is_active = 1 ORDER BY id DESC"
+    sql = "SELECT id, media_name, server_address, media_type, relative_path, file_format FROM `broadcast_media` WHERE is_active = 1 ORDER BY id DESC"
     cursor = connection.cursor()
     cursor.execute(sql)
     media_list = cursor.fetchall()
@@ -115,13 +115,14 @@ def admin():
 @app.route('/admin/media/update/<int:media_id>', methods=['POST'])
 def update_media(media_id):
     media_name = request.form.get('media_name', '').strip()
+    server_address = request.form.get('server_address', '').strip()
     relative_path = request.form.get('relative_path', '').strip()
     file_format = request.form.get('file_format', '').strip()
     if media_name and relative_path:
         connection = getConnection()
-        sql = "UPDATE `broadcast_media` SET media_name = %s, relative_path = %s, file_format = %s WHERE id = %s"
+        sql = "UPDATE `broadcast_media` SET media_name = %s, server_address = %s, relative_path = %s, file_format = %s WHERE id = %s"
         cursor = connection.cursor()
-        cursor.execute(sql, (media_name, relative_path, file_format, media_id))
+        cursor.execute(sql, (media_name, server_address, relative_path, file_format, media_id))
         connection.commit()
         cursor.close()
         connection.close()

@@ -50,6 +50,7 @@
                 <tr style="background:#667eea; color:#fff;">
                     <th style="padding:12px; text-align:left; border:1px solid #ddd;">ID</th>
                     <th style="padding:12px; text-align:left; border:1px solid #ddd;">メディア名</th>
+                    <th style="padding:12px; text-align:left; border:1px solid #ddd;">サーバーIP</th>
                     <th style="padding:12px; text-align:left; border:1px solid #ddd;">種別</th>
                     <th style="padding:12px; text-align:left; border:1px solid #ddd;">パス</th>
                     <th style="padding:12px; text-align:left; border:1px solid #ddd;">フォーマット</th>
@@ -62,6 +63,9 @@
                     <td style="padding:12px; border:1px solid #ddd;">{{ media.id }}</td>
                     <td style="padding:12px; border:1px solid #ddd;">
                         <input type="text" name="media_name" form="edit-{{ media.id }}" value="{{ media.media_name }}" style="width:100%; padding:6px;">
+                    </td>
+                    <td style="padding:12px; border:1px solid #ddd;">
+                        <input type="text" name="server_address" form="edit-{{ media.id }}" value="{{ media.server_address or '' }}" style="width:100%; padding:6px;">
                     </td>
                     <td style="padding:12px; border:1px solid #ddd;">{{ media.media_type }}</td>
                     <td style="padding:12px; border:1px solid #ddd;">

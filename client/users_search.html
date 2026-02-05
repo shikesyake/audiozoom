@@ -130,7 +130,7 @@
 <body>
     <div class="container">
         <h1>🔍 ユーザー検索</h1>
-        <p class="subtitle">レベル範囲でユーザーを検索（GETパラメータ使用）</p>
+        <p class="subtitle">権限レベル範囲でユーザーを検索（GETパラメータ使用）</p>
         
         <div class="nav">
             <a href="/">🏠 ホーム</a>
@@ -144,7 +144,7 @@
 
         <div class="search-form">
             <form action="/users/search" method="get">
-                <label>レベル</label>
+                <label>権限レベル</label>
                 <input type="number" name="min_level" value="{{ min_level }}" min="0" max="99" placeholder="最小">
                 <span>〜</span>
                 <input type="number" name="max_level" value="{{ max_level }}" min="0" max="99" placeholder="最大">
@@ -160,7 +160,7 @@
                 <tr>
                     <th>ID</th>
                     <th>名前</th>
-                    <th>レベル</th>
+                    <th>権限レベル</th>
                     <th>職業</th>
                 </tr>
             </thead>
